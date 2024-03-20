@@ -1,0 +1,203 @@
+:root {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    font-family: Helvetica Neue, Helvetica, Tahoma, 'Gill Sans', Arial, sans-serif;
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: #250057;
+    -webkit-font-smoothing: antialiased;
+}
+
+#viewport { /* everything except footer */
+    height: 95%;
+}
+
+.container-fluid {
+    width: 100%;
+    height: auto;
+    margin: auto 0;
+}
+
+.container-fluid-vertical {
+    height: 100%;
+    width: auto;
+    margin: 0;
+}
+
+.img { /* responsive images */
+    max-width: 100%;
+    height: auto;
+}
+
+footer {
+    height: 5%;
+    text-align: center;
+    padding: 1%;
+    color: white;
+}
+
+.nav-link, .nav-link:visited {
+    text-decoration: none;
+    color: #707070;
+}
+
+.nav-link:hover {
+    text-decoration: underline;
+}
+
+.input-text, .pill-btn {
+    display: block;
+    margin: 2rem auto;
+    font-size: 1.075rem;
+}
+
+.input-text {
+    text-indent: 4px;
+    max-width: 60%;
+    max-height: 2rem;
+    width: 60%;
+    height: 2rem;
+    border-radius: 0.25rem;
+    border: none;
+}
+
+input:focus {
+    outline: none;
+}
+
+.pill-btn {
+    border-radius: 1rem;
+    border: none;
+    cursor: pointer;
+    min-width: 8rem;
+    min-height: 2rem;
+    color: white;
+    background-color: #6666ff;
+    transition: background-color 0.75s ease;
+}
+
+.pill-btn:hover, .pill-btn:focus {
+    background-color: #3333ff;
+    outline: none;
+}
+
+#register-main {
+    display: flex;
+    justify-content: space-between;
+    min-height: inherit;
+    margin-bottom: 5%;
+}
+
+#register, #login-inner {
+    text-align: center;
+    max-height: 100%;
+    max-width: 40%;
+    width: 37%;
+    margin-right: 3%;
+    padding: 2%;
+    background: #e3e3e3;
+    color: #020021;
+}
+
+#login-main {
+    margin: 0;
+    padding: 0 31%;
+}
+
+#splash {
+    max-width: 60%;
+    width: 60%;
+    height: auto;
+    text-align: center;
+    /*padding: 15% 0;*/
+}
+
+#splash h1 {
+    font-size: 8em;
+    color: white;
+    margin: 0;
+}
+
+#splash h3 {
+    color: #bacbc8;
+}
+
+#login-inner h1 {
+    font-size: 4em;
+}
+
+#form-heading {
+    font-weight: bold;
+}
+
+
+#pword-toggle {
+    position: absolute;
+    right: 2%;
+    bottom: 0;
+    display: inline;
+    cursor: pointer;
+    margin: 0;
+    line-height: 1.5rem;
+    max-height: 100%;
+    max-width: auto;
+    background: white;
+    /*
+    border-right: 1px solid black;
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem; */
+}
+
+
+#color-mode {
+    background: url("lightmode.png");
+    height: 5px;
+    width: 5px;
+}
+
+#pword-group {
+    position: relative;
+    display: inline-block;
+    padding: 0;
+    max-width: 60%;
+    max-height: 2rem;
+    width: 100%;
+    height: 2rem;
+    background: white;
+    vertical-align: middle;
+}
+
+#password {
+    display: inline;
+    height: 100%;
+    max-width: 98%;
+    width: 98%;
+    margin: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.secret {    
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 0;
+    width: 0;
+    z-index: -1;
+}
+
+#notes {
+    filter: hue-rotate(270deg);
+}
+
+form button {
+    width: 50%;
+    font-weight: bold;
+}
