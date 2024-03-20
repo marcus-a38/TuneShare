@@ -67,7 +67,7 @@
                     <button class="pill-btn" type="submit">Submit</button>
                     <hr>
                     <p>
-                        Already have an account? <a href="login.php">Log in</a>
+                        Already have an account? <a href="./login.php">Log in</a>
                     </p>
                     <small>
                         Ensure that you've reviewed our 

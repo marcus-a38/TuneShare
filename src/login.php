@@ -40,7 +40,7 @@
             </div>
             <button class="pill-btn" type="submit">Submit</button>
             <hr>
-            <p>Don't have an account? <a href="register.php">Sign up</a></p>
+            <p>Don't have an account? <a href="./register.php">Sign up</a></p>
             <small>
                 Never give out your password. Under no circumstances<br>
                 will a developer ask you for your password.</a>
@@ -87,7 +87,6 @@
         } 
     
         $rows = $res->fetch_array(MYSQLI_ASSOC);
-    
     
         if (!password_verify($password, $rows['password'])) {
             php_form_alert("Invalid password for account '" . $user . "'.");

@@ -5,9 +5,9 @@ var passwordField = document.getElementById("password");
      
         if (passwordField.type === "password") {
             passwordField.type = "text";
-            passwordToggle.src = "hidepass.png";
+            passwordToggle.src = "../img/hidepass.png";
         } else {
             passwordField.type = "password";
-            passwordToggle.src = "showpass.png"; 
+            passwordToggle.src = "../img/showpass.png"; 
         }
     }
