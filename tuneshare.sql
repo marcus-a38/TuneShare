@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 04, 2024 at 05:36 PM
--- Server version: 10.4.27-MariaDB
--- PHP Version: 8.2.0
+-- Generation Time: Mar 20, 2024 at 05:54 AM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -35,6 +35,13 @@ CREATE TABLE `album` (
   `release_year` year(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `album`
+--
+
+INSERT INTO `album` (`id`, `artist_id`, `genre_id`, `title`, `release_year`) VALUES
+(1, 1, 1, 'Abbey Road', '1969');
+
 -- --------------------------------------------------------
 
 --
@@ -46,6 +53,13 @@ CREATE TABLE `artist` (
   `name` varchar(84) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `artist`
+--
+
+INSERT INTO `artist` (`id`, `name`) VALUES
+(1, 'The Beatles');
+
 -- --------------------------------------------------------
 
 --
@@ -56,6 +70,13 @@ CREATE TABLE `genre` (
   `id` int(10) UNSIGNED NOT NULL,
   `name` varchar(72) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `genre`
+--
+
+INSERT INTO `genre` (`id`, `name`) VALUES
+(1, 'Rock');
 
 -- --------------------------------------------------------
 
@@ -69,8 +90,16 @@ CREATE TABLE `post` (
   `parent_id` int(10) UNSIGNED DEFAULT NULL,
   `song_id` int(10) UNSIGNED DEFAULT NULL,
   `content` varchar(255) DEFAULT NULL,
-  `time_posted` timestamp NOT NULL DEFAULT current_timestamp()
+  `time_posted` timestamp NOT NULL DEFAULT current_timestamp(),
+  `hidden` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `post`
+--
+
+INSERT INTO `post` (`id`, `user_id`, `parent_id`, `song_id`, `content`, `time_posted`, `hidden`) VALUES
+(3, 1, NULL, 1, 'Dummy text for testing!', '2024-03-20 02:25:13', 0);
 
 -- --------------------------------------------------------
 
@@ -86,6 +115,17 @@ CREATE TABLE `report` (
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `report`
+--
+
+INSERT INTO `report` (`id`, `post_id`, `reason`, `details`, `timestamp`) VALUES
+(1, 3, 0, 'Dummy report for testing!', '2024-03-20 02:26:23'),
+(2, 3, 0, 'Dummy text for testing!', '2024-03-20 02:26:31'),
+(3, 4, 0, 'Dummy text for testing!', '2024-03-20 02:26:35'),
+(4, 4, 0, 'Dummy text for testing!', '2024-03-20 02:26:42'),
+(5, 4, 0, 'Dummy text for testing!', '2024-03-20 02:26:42');
+
 -- --------------------------------------------------------
 
 --
@@ -98,6 +138,13 @@ CREATE TABLE `song` (
   `title` varchar(95) NOT NULL,
   `duration` time NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `song`
+--
+
+INSERT INTO `song` (`id`, `album_id`, `title`, `duration`) VALUES
+(1, 1, 'Golden Slumbers', '00:00:00');
 
 -- --------------------------------------------------------
 
@@ -117,6 +164,13 @@ CREATE TABLE `user` (
   `is_disabled` tinyint(1) NOT NULL DEFAULT 0,
   `is_private` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user`
+--
+
+INSERT INTO `user` (`id`, `username`, `display_name`, `email`, `phone`, `password`, `user_type`, `creation_date`, `is_disabled`, `is_private`) VALUES
+(1, 'Garlic', 'Garlic', 'garlic@gmail.com', NULL, 'password', 1, '2024-03-20 02:24:53', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -199,43 +253,43 @@ ALTER TABLE `vote`
 -- AUTO_INCREMENT for table `album`
 --
 ALTER TABLE `album`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `artist`
 --
 ALTER TABLE `artist`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `genre`
 --
 ALTER TABLE `genre`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `post`
 --
 ALTER TABLE `post`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `report`
 --
 ALTER TABLE `report`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `song`
 --
 ALTER TABLE `song`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `vote`
