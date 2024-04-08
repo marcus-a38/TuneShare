@@ -8,6 +8,9 @@
     <body style="background-color:#250057">
         <div class="w3-container w3-sans-serif w3-text-black" style="width:50%; margin-left:25%; margin-top:100px; margin-bottom:50px; background-color:#e3e3e3">
             <p>
+                <?php
+                $description = "Error!";
+                ?>
                 <center>
                     <div style="padding: 10px; padding-bottom: 20px">
                         <?php
@@ -68,13 +71,25 @@
                         $conn->close();
                     ?>
                 </table>
+                <div style="padding: 20px; padding-bottom: 20px">
+                <?php
+                echo '<b>Moderation Action Description</b><br>';
+                ?>
+                </div>
+
+                <form action="hidePostAction.php" method="POST">
+                    <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
+                    <input type="hidden" name="moderator_id" value="<?php echo 1; ?>">
+        
+                    <input type="text" class="w3-input" id="desc" name="desc">
+                    <div style="padding: 20px">
+                        <input type="submit" value="Hide Post" class="w3-bar-item w3-btn w3-black" style="width:20%">
+                        <input type="submit" value="Clear Reports" class="w3-bar-item w3-btn w3-black" style="width:20%">
+                        <a href="./moderation.php" class="w3-bar-item w3-btn w3-black" style="width:20%">Back</a>
+                    <div>
                 
-                <div style="padding: 20px">
-                    <?php
-                    echo '<a href="./hidePostAction.php?post_id=' . $post_id . '" class="w3-bar-item w3-btn w3-black" style="width:33.3%">Hide Post</a>';       
-                    ?>
-                    <a href="./moderation.php" class="w3-bar-item w3-btn w3-black" style="width:33.3%">Back</a>
-                <div>
+                </form>
+
                 </center>
             </p>
         </div>

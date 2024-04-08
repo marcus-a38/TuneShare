@@ -9,26 +9,20 @@
         <div class="w3-container w3-text-black" style="width:50%; margin-left:25%; margin-top:100px; margin-bottom:50px; background-color:#e3e3e3;">
             <p>
                 <center>
-                <div style="padding: 10px; padding-bottom: 20px">
-                    <b>Posts with Reports</b>
-                </div>
-                <table class="w3-table-all">
+                 <table class="w3-table-all">
                     <tr> 
-                        <th>Post ID</th>
-                        <th>Content</th>
-                        <th>Reports</th>
-                        <th>View</th>
+                        <th>Action ID</th>
+                        <th>Moderator ID</th>
+                        <th>Moderator Username</th>
+                        <th>Action Type</th>
+                        <th>Description</th>
+                        <th>Time</th>
                     </tr>
                     <?php                      
                         require 'DBConnect.php';
 
                         $statement = $conn->prepare(
-                        "SELECT p.*, COUNT(r.post_id) AS report_count FROM post p
-                        LEFT JOIN report r ON p.id = r.post_id
-                        WHERE p.hidden = 0
-                        GROUP BY p.id
-                        HAVING report_count > 0
-                        ORDER BY report_count DESC;");
+                        "SELECT moderation_record.*, user.username FROM moderation_record JOIN user ON moderation_record.moderator_id = user.id ORDER BY moderation_record.date DESC;");
                         $statement->execute();
                         $result = $statement->get_result();
 
@@ -36,9 +30,11 @@
                             while ($r = $result->fetch_assoc()) {
                                 echo '<tr>';
                                 echo '<td>' . $r['id'] . '</td>';
-                                echo '<td>' . $r['content'] . '</td>';
-                                echo '<td>' . $r['report_count'] . '</td>';
-                                echo '<td>' . '<a href="./moderatePost.php?post_id=' . $r['id'] . '" class="w3-bar-item w3-btn w3-black">More</a>' . '</td>';
+                                echo '<td>' . $r['moderator_id'] . '</td>';
+                                echo '<td>' . $r['username'] . '</td>';
+                                echo '<td>' . $r['action'] . '</td>';
+                                echo '<td>' . $r['description'] . '</td>';
+                                echo '<td>' . $r['date'] . '</td>';
                                 echo '</tr>';
                             }
                         }
@@ -49,8 +45,7 @@
                 </table>
                                
                 <div style="padding: 20px">
-                    <a href="records.php" class="w3-bar-item w3-btn w3-black" style="width:33.3%">Records</a>
-                    <a href="../../index.php" class="w3-bar-item w3-btn w3-black" style="width:33.3%">Back</a>
+                    <a href="moderation.php" class="w3-bar-item w3-btn w3-black" style="width:33.3%">Back</a>
                 </div>
                 </center>
             </p>

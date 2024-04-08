@@ -5,7 +5,7 @@ $user = "root";
 $password = "";
 
 $successful = true;
-mysqli_report(MYSQLI_REPORT_STRICT);
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 try {
     $conn = mysqli_connect($server, $user, $password, $database);
 }catch (Exception $exception) {

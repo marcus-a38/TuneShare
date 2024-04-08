@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 20, 2024 at 05:54 AM
+-- Generation Time: Apr 08, 2024 at 07:43 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -77,6 +77,31 @@ CREATE TABLE `genre` (
 
 INSERT INTO `genre` (`id`, `name`) VALUES
 (1, 'Rock');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `moderation_record`
+--
+
+CREATE TABLE `moderation_record` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `post_id` int(10) NOT NULL,
+  `moderator_id` int(10) UNSIGNED NOT NULL,
+  `action` enum('CLEAR_REPORTS','HIDE_POST') NOT NULL,
+  `description` varchar(250) NOT NULL,
+  `date` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `moderation_record`
+--
+
+INSERT INTO `moderation_record` (`id`, `post_id`, `moderator_id`, `action`, `description`, `date`) VALUES
+(4, 3, 1, 'HIDE_POST', 'Dummy text for testing!', '0000-00-00 00:00:00'),
+(6, 3, 1, 'HIDE_POST', 'Test!!!', '0000-00-00 00:00:00'),
+(7, 3, 1, 'HIDE_POST', 'Test 34345353', '2024-04-07 22:19:12'),
+(8, 3, 1, 'HIDE_POST', 'Test!!!', '2024-04-07 22:20:12');
 
 -- --------------------------------------------------------
 
@@ -170,7 +195,8 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `username`, `display_name`, `email`, `phone`, `password`, `user_type`, `creation_date`, `is_disabled`, `is_private`) VALUES
-(1, 'Garlic', 'Garlic', 'garlic@gmail.com', NULL, 'password', 1, '2024-03-20 02:24:53', 0, 0);
+(1, 'Garlic', 'Garlic', 'garlic@gmail.com', NULL, 'password', 1, '2024-03-20 02:24:53', 0, 0),
+(2, 'Test', 'Test', 'email@gmail.com', NULL, '$2y$10$9M5SQyP6ekSWsdLPNcKlM.f8JGoGRsdyiscNnWlUKdAMkpdW40P1u', 1, '2024-03-25 14:13:45', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -208,6 +234,13 @@ ALTER TABLE `artist`
 --
 ALTER TABLE `genre`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `moderation_record`
+--
+ALTER TABLE `moderation_record`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `moderation_record_ibfk_1` (`moderator_id`);
 
 --
 -- Indexes for table `post`
@@ -268,6 +301,12 @@ ALTER TABLE `genre`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `moderation_record`
+--
+ALTER TABLE `moderation_record`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
 -- AUTO_INCREMENT for table `post`
 --
 ALTER TABLE `post`
@@ -283,13 +322,13 @@ ALTER TABLE `report`
 -- AUTO_INCREMENT for table `song`
 --
 ALTER TABLE `song`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `vote`
@@ -307,6 +346,12 @@ ALTER TABLE `vote`
 ALTER TABLE `album`
   ADD CONSTRAINT `fk_arid` FOREIGN KEY (`artist_id`) REFERENCES `artist` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_gid` FOREIGN KEY (`genre_id`) REFERENCES `genre` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `moderation_record`
+--
+ALTER TABLE `moderation_record`
+  ADD CONSTRAINT `moderation_record_ibfk_1` FOREIGN KEY (`moderator_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `post`
