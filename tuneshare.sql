@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 04, 2024 at 05:36 PM
+-- Generation Time: Apr 08, 2024 at 04:08 AM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 8.2.0
 
@@ -30,9 +30,19 @@ SET time_zone = "+00:00";
 CREATE TABLE `album` (
   `id` int(10) UNSIGNED NOT NULL,
   `artist_id` int(10) UNSIGNED NOT NULL,
-  `genre_id` int(10) UNSIGNED NOT NULL,
   `title` varchar(200) NOT NULL,
   `release_year` year(4) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `album_genre`
+--
+
+CREATE TABLE `album_genre` (
+  `album_id` int(10) UNSIGNED NOT NULL,
+  `genre_id` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -44,6 +54,17 @@ CREATE TABLE `album` (
 CREATE TABLE `artist` (
   `id` int(10) UNSIGNED NOT NULL,
   `name` varchar(84) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `friendship`
+--
+
+CREATE TABLE `friendship` (
+  `user1_id` int(10) UNSIGNED NOT NULL,
+  `user2_id` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -69,7 +90,8 @@ CREATE TABLE `post` (
   `parent_id` int(10) UNSIGNED DEFAULT NULL,
   `song_id` int(10) UNSIGNED DEFAULT NULL,
   `content` varchar(255) DEFAULT NULL,
-  `time_posted` timestamp NOT NULL DEFAULT current_timestamp()
+  `time_posted` timestamp NOT NULL DEFAULT current_timestamp(),
+  `slug_hash` varchar(8) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -140,14 +162,27 @@ CREATE TABLE `vote` (
 --
 ALTER TABLE `album`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_arid` (`artist_id`),
-  ADD KEY `fk_gid` (`genre_id`);
+  ADD KEY `fk_arid` (`artist_id`);
+
+--
+-- Indexes for table `album_genre`
+--
+ALTER TABLE `album_genre`
+  ADD KEY `fk_aid` (`album_id`),
+  ADD KEY `fk_grid` (`genre_id`);
 
 --
 -- Indexes for table `artist`
 --
 ALTER TABLE `artist`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `friendship`
+--
+ALTER TABLE `friendship`
+  ADD KEY `fk_uid1` (`user1_id`),
+  ADD KEY `fk_uid2` (`user2_id`);
 
 --
 -- Indexes for table `genre`
@@ -160,6 +195,7 @@ ALTER TABLE `genre`
 --
 ALTER TABLE `post`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `slug_hash` (`slug_hash`),
   ADD KEY `fk_sid` (`song_id`),
   ADD KEY `fk_usid` (`user_id`),
   ADD KEY `fk_parid` (`parent_id`);
@@ -181,7 +217,9 @@ ALTER TABLE `song`
 -- Indexes for table `user`
 --
 ALTER TABLE `user`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `username` (`username`);
 
 --
 -- Indexes for table `vote`
@@ -251,8 +289,21 @@ ALTER TABLE `vote`
 -- Constraints for table `album`
 --
 ALTER TABLE `album`
-  ADD CONSTRAINT `fk_arid` FOREIGN KEY (`artist_id`) REFERENCES `artist` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_gid` FOREIGN KEY (`genre_id`) REFERENCES `genre` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_arid` FOREIGN KEY (`artist_id`) REFERENCES `artist` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `album_genre`
+--
+ALTER TABLE `album_genre`
+  ADD CONSTRAINT `fk_aid` FOREIGN KEY (`album_id`) REFERENCES `album` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_grid` FOREIGN KEY (`genre_id`) REFERENCES `genre` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `friendship`
+--
+ALTER TABLE `friendship`
+  ADD CONSTRAINT `fk_uid1` FOREIGN KEY (`user1_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_uid2` FOREIGN KEY (`user2_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `post`

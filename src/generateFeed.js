@@ -100,7 +100,7 @@ function start() {
             const status = xhr.status;
             if (status === 0 || (status >= 200 && status < 400)) {
                 response = JSON.parse(xhr.responseText);
-                generateMany(2, response);
+                generateMany(response.length, response);
             } else {
                 response = null;
             }
