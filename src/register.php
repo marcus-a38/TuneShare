@@ -1,6 +1,5 @@
 <?php 
     require_once "header.php"; 
-    session_start();
 ?>
 
         <div class="container-fluid" id="register-main">
@@ -87,25 +86,8 @@
 
 <?php // connect to API later
 
-    const MYSQLI_DUPLICATE_ERROR = 1062;
+    const MYSQLI_DUPLICATE_ERRNO = 1062;
 
-    $connection = new mysqli(
-        "localhost",
-        "root",
-        "",
-        "tuneshare"
-    );
-    
-    if (!$connection) {
-        php_form_alert("Unexpected database error. Please contact devs.");
-    }
-
-    /*
-     * 
-     * 
-     * 
-     * 
-     */
     function length_err(string $type) {
         
         $table = array(
@@ -139,11 +121,15 @@
     }
 
     if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) == 'POST') {
+        
+        require_once "./api/api.php";
+        
+        $db = new DatabaseObject();
 
         $honeypot = filter_input(INPUT_POST, 'phone');
     
         if ($honeypot) {
-            exit ("Security measure failed");
+            exit ("Security measure failed.");
         }
 
         $username = filter_input(INPUT_POST, 'username');
@@ -175,22 +161,20 @@
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
         
         /* This will be replaced with API code */
-        $stmt = "INSERT INTO user ("
+        $query = "INSERT INTO user ("
                 . "username,"
                 . "display_name,"
                 . "email,"
                 . "password"
                 . ") VALUES (?, ?, ?, ?)";
         
-        $params = array($username, $display, $email, $hashed_password);
+        $params = [$username, $display, $email, $hashed_password];
         
         try {
-            $connection->execute_query($stmt, $params);
+            $db->set_query($query, $params);
         }
-            
-        // catch duplicate entries
         catch (mysqli_sql_exception) {
-            if ($connection->errno === MYSQLI_DUPLICATE_ERROR) {
+            if ($db->errno === MYSQLI_DUPLICATE_ERRNO) {
                 php_form_alert("Username or email already exists.");
             }
             php_form_alert("Unspecified MySQL error.");
@@ -204,7 +188,7 @@
         $_SESSION['disabled'] = false;
         $_SESSION['private'] = false;
         
-        header("Location: index.php");
+        #header("Location: index.php");
             
     }
    

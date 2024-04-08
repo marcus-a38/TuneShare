@@ -1,6 +1,5 @@
 <?php 
     require_once "header.php";
-    session_start();
 ?>
 
 <div class="container-fluid" id="login-main">
@@ -43,7 +42,7 @@
             <p>Don't have an account? <a href="./register.php">Sign up</a></p>
             <small>
                 Never give out your password. Under no circumstances<br>
-                will a developer ask you for your password.</a>
+                will a developer ask you for your password.
             </small>
         </form>
     </div>
@@ -100,14 +99,8 @@
         $_SESSION['usertype'] = $rows['user_type'];
         $_SESSION['disabled'] = $rows['is_disabled'];
         $_SESSION['private'] = $rows['is_private'];
-    
-        echo "<h1>Login successful for:</h1>"
-             . "<p>" . $_SESSION['username'] ."</p>"
-             . "<p>" . $_SESSION['display'] ."</p>"
-             . "<p>" . $_SESSION['email'] . "</p>"
-             . "<p>" . $_SESSION['usertype'] ."</p>"
-             . "<p>" . $_SESSION['disabled'] ."</p>"
-             . "<p>" . $_SESSION['private'] . "</p>";
+        
+        header("Location: index.php");
         
     }
 

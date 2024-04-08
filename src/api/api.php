@@ -1,54 +1,20 @@
 <?php
 
-/*--/
-/* 
-/*  TuneShare
-/* 
-/*  API * Version 1 * 3/20/24
-/* 
-/--*/
-
-namespace api;
-
-require_once 'Request.php';
-use api\Request;
+const ONE_SECOND_IN_MICRO = 1_000_000; // μs
+$post_load_ct = 0;
 
 /*--/
 /* 
-/*  Inherits mysqli object, to be used with throttler
+/*  
 /*
 /*  @author Marcus Antonelli * contact@marcusantonelli.com
-/* 
+/* pre
 */
 class DatabaseObject extends \mysqli {
-   
-    /*--/
-    /*
-    /*  Implement next
-    */
-    private $throttler;
+  
     
-    /*--/
-    /*
-    /*  Most recent action (timestamp, UNIX)
-    */  
-    private $time;
-    
-    /*--/
-    /*
-    /*  Last unique request ID
-    */
-    private $curr;
-    
-    /*--/
-    /*
-    /*  User-provided database connection settings
-    */
-    private $settings;
-    
-    /*--/
-    /*
-    /*  Default database connection settings
+    /**
+    *  Default database connection settings
     */
     private static $default_settings = [
         "hostname" => "localhost",
@@ -65,50 +31,30 @@ class DatabaseObject extends \mysqli {
     /*  @param array $settings - Connection settings for DatabaseObject
     /*
     */
-    public function __construct(array $settings) {
+    public function __construct(?array $settings = []) {
         
         // Apply settings
         $intersect = array_intersect_key($settings, self::$default_settings);
-        $this->settings = array_merge(self::$default_settings, $intersect);
+        $merged_settings = array_merge(self::$default_settings, $intersect);
+        parent::__construct(...$merged_settings);
         
-        // Connect
-        parent::__construct(...$this->settings);
-        
-        // Initialize time and starting request ID
-        $this->time = microtime(true);
-        $this->curr = 0;
+        if ($this->connect_errno) {
+            echo "<h1>Debug- Database error: " . $this->connect_error . "</h1>";
+        }
         
         // Enforce utf8mb4 charset
         $this->set_charset("utf8mb4");
         
     }
     
-    /*--/
-    /*
-    /*  Destructor - Ensures proper commit and closure of connection on exit
-    /*  
-    */
-    public function __destruct() {
+    private function query_with(string $query, ?array $params) {
         
+        $this->begin_transaction();
+        $response = $this->execute_query($query, $params);
         $this->commit();
-        $this->close();
         
-    }
-    
-    /*--/
-    /* 
-    /*  Instantiates a request object to encapsulate SQL query
-    /* 
-    /*  @param string $query - Pure, parameterized SQL query
-    /*  @param ?array $params - Parameters to insert into the query
-    /*
-    /*  @returns Request _ - Encapsulates query, setting up for throttling
-    /*
-    */
-    public function prepare_request(string $query, ?array $params = []) {
-        
-        // Request($id, $sql, $params)
-        return new Request($this->curr++, $query, $params);
+        usleep(ONE_SECOND_IN_MICRO/2);
+        return $response;
         
     }
     
@@ -128,44 +74,40 @@ class DatabaseObject extends \mysqli {
     /*  when throttling methods are implemeneted.
     /*
     */
-    public function get_query(Request $request) {
+    public function get_query(string $query, ?array $params = []) {      
         
-        $response = $this->execute_query($request->query, $request->params);
-        $request->response = $response;
-        $this->time = microtime(true);
-        
-        return ($response) ? $response->fetch_all(MYSQLI_ASSOC) : false;
+        // Shared lock
+        $sql = $query
+               . " FOR SHARE;";
+        $response = $this->query_with($query, $params);
+        return $response ? $response->fetch_all(MYSQLI_ASSOC) : false; 
         
     }
    
-    /*--/
-    /*
-    /*  Executes CREATE, UPDATE, or DELETE queries on MySQL database
-    /*  and indicates success or failure in doing so (true or false value)
-    /* 
-    /*  @param Request $request - MySQL request/query to execute 
-    /* 
-    /*  @returns bool $response - True/false to indicate query success/failure
-    /*
-    /*  Footnote: This method needs to be adjusted in the future. The
-    /*  Request attributes are unused, but will be necessary in the future,
-    /*  when throttling methods are implemeneted.
-    /* 
+    /**
+    **
+    ** 
+    **  public function set_query:
+    ** 
+    **  Carries out CREATE, UPDATE, or DELETE query on database,
+    **  indicates success(true)/failure(false) in doing so.
+    ** 
+    **  @param string $query
+    **  @param ?array $params
+    ** 
+    **  @returns bool $response - True/false to indicate query success/failure
+    **
+    ** 
     */
-    public function set_query(Request $request) {
+    public function set_query(string $query, ?array $params = []) {
         
-        $response = $this->execute_query($request->query, $request->params);
-        $request->response = $response;
-        $this->time = microtime(true);
-        
-        return $response;
+        // Exclusive lock
+        $sql = $query
+               . " FOR UPDATE;";
+        return $this->query_with($sql, $params);
         
     }
     
 }
-
-// If no database connection currently exists, create one
-global $connection;
-if (!isset($connection)) { $connection = new DatabaseObject([""]); }
 
 ?>

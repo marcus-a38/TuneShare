@@ -9,13 +9,24 @@
 body {
     margin: 0;
     padding: 0;
-    height: 100%;
-    background-color: #250057;
+    min-height: 100vh;
+    background-image: linear-gradient(#250057, #3f0f80);
     -webkit-font-smoothing: antialiased;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
-#viewport { /* everything except footer */
-    height: 95%;
+main { /* everything except footer */
+    min-height: 100%;
+}
+
+.hover-darken {
+    filter: brightness(100%);
+    transition: all 0.5s ease;
+}
+
+.hover-darken:hover {
+    filter: brightness(87.5%);
 }
 
 .container-fluid {
@@ -36,10 +47,12 @@ body {
 }
 
 footer {
-    height: 5%;
+    max-height: 5%;
     text-align: center;
     padding: 1%;
     color: white;
+    left: 0;
+    background: #250057;
 }
 
 .nav-link, .nav-link:visited {
@@ -89,9 +102,7 @@ input:focus {
 
 #register-main {
     display: flex;
-    justify-content: space-between;
-    min-height: inherit;
-    margin-bottom: 5%;
+    padding-bottom: 3rem;
 }
 
 #register, #login-inner {
@@ -108,6 +119,7 @@ input:focus {
 #login-main {
     margin: 0;
     padding: 0 31%;
+    padding-bottom: 3rem;
 }
 
 #splash {
@@ -136,6 +148,10 @@ input:focus {
     font-weight: bold;
 }
 
+#form-alert {
+    color: black;
+}
+
 
 #pword-toggle {
     position: absolute;
@@ -146,7 +162,7 @@ input:focus {
     margin: 0;
     line-height: 1.5rem;
     max-height: 100%;
-    max-width: auto;
+    width: auto;
     background: white;
     /*
     border-right: 1px solid black;
@@ -200,4 +216,308 @@ input:focus {
 form button {
     width: 50%;
     font-weight: bold;
+}
+
+/* credit https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_popup */
+#p-popup {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#popup {
+    visibility: hidden;
+    width: 200%;
+    background: #e3e3e3;
+    color: #020021;
+    text-align: center;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+    top: 125%;
+    right: 25%;
+    font-size: 1rem;
+}
+
+#toolbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    user-select: none;
+}
+
+#toolbar > * {
+    padding: 0.75rem;
+}
+
+nav {
+    color: white;
+    padding: 0.25rem;
+}
+
+#p-popup div {
+    height: 3rem;
+    width: auto;
+    margin: 0;
+    padding: 0;
+}
+
+#p-popup hr {
+    height: 1px;
+    margin: 0;
+}
+
+#popup a {
+    padding: 1rem;
+    display: inline-block;
+    height: calc(100% - 2rem);
+    width: calc(100% - 2rem);
+}
+
+#p-popup a, #p-popup a:visited {
+    text-decoration: none;
+    color: inherit;
+}
+
+#p-popup div:hover {
+    background: #cccccc;
+    border: inherit;
+}
+
+#p-popup .show {
+  visibility: visible;
+}
+
+#toggle-dark {
+    max-height: 2.5rem;
+    max-width: 2.5rem;
+    height: 2.5rem;
+    width: 2.5rem;
+    cursor: pointer;
+}
+
+#notifications {
+    display: inline-block;
+    height: 1.25rem;
+    width: 1.25rem;
+    border-radius: 0.75rem;
+    background: red;
+    line-height: 1.25rem;
+    text-align: center;
+    color: white;
+}
+
+#feed-modes{
+    text-align: center; 
+    padding: 0.25rem 0; 
+    margin-bottom: 1rem;
+    user-select: none;
+}
+
+#feed-modes > *{
+    font-size: 1.25rem;
+    color: white;
+    text-decoration: none;
+    transition: color 0.5s ease;
+    
+}
+
+#feed-modes .active {
+    color: #cccccc;
+}
+
+#feed-modes .active:hover {
+    color: #999999;
+}
+
+#feed-modes a:hover {
+    color: #cccccc;
+}
+
+.post-container {
+    max-width: 30rem;
+    max-height: 22rem;
+    margin-left: calc(50% - 15rem);
+    margin-bottom: 1.3rem;
+}
+
+.post-user {
+    height: 1.75rem;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    line-height: 1.75rem;
+}
+
+.post-user a, .post-user p {
+    text-decoration: none;
+    color: white;
+    display: inline-block;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.post {
+
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px white solid;
+    
+}
+
+.post-top {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-bottom: 1px solid white;
+}
+
+.post-details {
+    color: white;
+    flex-grow: 1;
+    text-align: center;
+    padding: 3.5% 0;
+}
+
+.post-song a {
+    font-size: 1rem;
+    color: white;
+    text-decoration: none;
+}
+
+.post-genres {
+    margin: 0.25rem;
+    
+}
+
+.post-genres p {
+    background: rgba(255, 255, 255, 0.5);
+    color: #250057;
+    padding: 0.25rem;
+    margin: 0 0.25rem;
+    border-radius: 0.25rem;
+    user-select: none;
+}
+
+.post-details a, .post-details p {
+    display: inline;
+}
+
+.post-btm {
+    max-height: 5rem;
+}
+
+.post-txt, .post-top {
+    padding: 1rem;
+    color: white;
+}
+
+.post-body {
+    overflow-wrap: anywhere;
+}
+
+
+.post-top img{
+    display: inline-block;
+    max-height: 4rem;
+    width: auto;
+}
+
+.post-btm {
+    height: 3rem;
+    display: flex;
+    background: #e3e3e3;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem auto;
+    gap: 0.25rem;
+}
+
+#new-post {
+    cursor: pointer;
+    position: fixed;
+    top: 82.5%;
+    left: 47.6%;
+    padding: 0.4%;
+    width: 5%;
+    height: auto;
+    z-index: 1;
+    background: rgba(37, 0, 87, 0.5);
+    border-radius: 1.25rem;
+}
+
+.post-action {
+    cursor: pointer;
+    height: 2rem;
+    width: 2rem;
+}
+
+#logout, #logout input {
+    display: inline-block;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+}
+
+#logout {
+    display: inline-block;
+    min-height: 100%;
+}
+
+.post-action:has(> form) {
+    padding: 0;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+#account-posts {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+#account-posts #row1, #account-posts #row2 {
+    
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    
+}
+
+.post-preview {
+    border: 1px solid white;
+    padding: 0.5rem;
+    width: 10rem;
+    height: 10rem;
+}
+
+#logo {
+    color: white;
+    font-size: 3rem;
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+    text-decoration: none;
+}
+
+.divider {
+    height: 75%; 
+    width: 2px; 
+    background: #250057;
+    margin: 0 0.25rem;
 }
