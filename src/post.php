@@ -1,24 +1,16 @@
-<?php
+<?php 
 
-$user_flag = true;
-require_once "header.php";
-
-if (!isset($_SESSION['username'])) {
-    header("Location: register.php");
-}
-
-$_SESSION['feedLoadRefrCt'] = 0;
-
+    $user_flag = true;
+    require_once "header.php"; 
+    
+    if (!isset($_SESSION['username'])) {
+        header("Location: register.php");
+    } 
+    
 ?>
 
-<div class="container-fluid" id="feed-modes">
-    <a href="?ftype=friends" class="active">Friends</a>
-    <span>|</span>
-    <a href="?ftype=home">Suggested</a>
-</div>
 <div class="container-fluid" id="feed">
-    
-    <template id="post-template">
+<template id="post-template">
         <div class="post-container">
             <div class="post-user">
                 <a href="#" class="post-dname hover-darken"></a>
@@ -64,50 +56,17 @@ $_SESSION['feedLoadRefrCt'] = 0;
             </div>
         </div>
     </div>
-    </template>
+</template>
 </div>
-    
-<div class="container hidden">
-        <div id="create-post">
-            <form method="POST" action="">
-                <input
-                    type="text" 
-                    name=""
-                    placeholder=""
-                />
-                <input 
-                    type="text"
-                    name=""
-                    placeholder=""
-                />
-                <input 
-                    type="text"
-                    name=""
-                    placeholder=""
-                />
-                <button type="submit" name="create_post"></button>
-            </form>
-    </div>
-</div>
-<img src="../img/add.png" id="new-post" class="hover-darken" onclick="" />
 
 <script src="api.js"></script>
-<script>generateFeed();</script>
-
-<script>
-function toggleColor() {
-    var toggler = document.getElementById("toggle-dark");
-    if (toggler.getAttribute('src') === "../img/moon.png") {
-        toggler.src = "../img/sun.png";
-    } else {
-        toggler.src = "../img/moon.png";
-    }
-}
-</script>
 
 <?php 
 
-require_once "footer.php"; 
 require_once "api/api.php";
+$slug = filter_input(INPUT_GET, 'p', FILTER_UNSAFE_RAW);
+if (!$slug) { header("Location: index.php"); exit; }
+echo "<script>getPost('".$slug."')</script>";
+require_once "footer.php";
 
 ?>

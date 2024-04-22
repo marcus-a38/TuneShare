@@ -6,7 +6,7 @@
             <span>&#x2022;</span>
             <a href="#" class="nav-link">Terms of Service</a>
     </footer>
-    <?php if (isset($_SESSION['username'])): ?>
+    <?php if (isset($_SESSION['userId'])): ?>
     <script>
         function openPopup() {
             var popup = document.getElementById("popup");
@@ -14,8 +14,5 @@
         }
     </script>
     <?php endif; ?>
-    <script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js" 
-            data-web-components async>
-    </script>
-    </body>
+</body>
 </html>

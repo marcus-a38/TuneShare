@@ -9,17 +9,12 @@
  //   exit(1);
 //}
 
-// utility function
-    function php_form_alert(string $msg) {
-        echo '<script type="text/javascript">formAlert("' . $msg . '");</script>';
-        exit();
-    }
     
     session_start();
     
-    if(isset($_SESSION['username']) && !isset($user_flag)) {
-        header("Location: index.php");
-    }
+    #if(isset($_SESSION['username']) && !isset($user_flag)) {
+    #    header("Location: index.php");
+    #}
     
 ?>
 
@@ -32,9 +27,17 @@
             <div class="container-fluid" id="toolbar">  
                 <img src="../img/sun.png" id="toggle-dark" class="hover-darken"
                      onclick="toggleColor()" style="display:inline-block" />
-                <?php if (isset($_SESSION['username'])){
-                    echo "<a href='index.php' id='logo'>TuneShare</a>";
-                    require_once "navigation.php"; 
-                }
+                <?php 
+                    if (isset($_SESSION['username'])){
+                        require_once "navigation.php"; 
+                        echo "</div>";
+                        echo "<div style='text-align: center'>"
+                        . "<a href='index.php' id='logo'>TuneShare</a>"
+                                . "</div>";
+                    }
+                    else {
+                        echo "</div>";
+                    }
                 ?>
+                
             </div>

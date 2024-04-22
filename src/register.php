@@ -24,28 +24,36 @@
                 <p id="form-alert"></p>
                 <form action="" method="POST">
                     <!-- Visible fields -->
+                    <input name="action"
+                           value="signup" 
+                           class="secret" 
+                           readonly />
                     <input type="text" 
                            accept=""class="input-text" 
                            name="email" 
                            placeholder="email"
-                           maxlength="255" />
+                           maxlength="255" 
+                           required />
                     <input type="text" 
                            class="input-text" 
                            name="username" 
                            placeholder="username"
-                           maxlength="24" />
+                           maxlength="24"
+                           required />
                     <input type="text" 
                            class="input-text" 
-                           name="display-name" 
+                           name="display_name" 
                            placeholder="display name"
-                           maxlength="48" />
+                           maxlength="48" 
+                           required />
                     <span class="container" id="pword-group">
                         <input type="password" 
                                class="input-text" 
                                id="password" 
                                name="password" 
                                placeholder="password"
-                               maxlength="72" />
+                               maxlength="72"
+                               required />
                         <img id="pword-toggle" 
                              src="../img/showpass.png"
                              onclick="togglePassVisible()" />
@@ -81,115 +89,13 @@
         <script src='revealPassword.js'></script>
         <script src='formAlerts.js'></script>
 
-<?php require_once "footer.php"; ?>
+<?php 
+    require_once "footer.php";
+    require_once "api/api.php" 
+?>
 
 
 <?php // connect to API later
 
-    const MYSQLI_DUPLICATE_ERRNO = 1062;
-
-    function length_err(string $type) {
-        
-        $table = array(
-            "Username" => array(
-                0 => "3",
-                1 => "24"
-            ),
-            "Display" => array(
-                0 => "3",
-                1 => "48"
-            ),
-            "Email" => array(
-                0 => "3",
-                1 => "255"
-            ),
-            "Password" => array(
-                0 => "8",
-                1 => "72"
-            )
-        ); // $table
-        
-        $msg = $type // e.g. "Username"
-               . " is too short or long. Try a value between "
-               . $table[$type][0] // e.g. "3"
-               . " and "
-               . $table[$type][1] // e.g. "72"
-               . ' characters.';
-        
-        php_form_alert($msg);
-
-    }
-
-    if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) == 'POST') {
-        
-        require_once "./api/api.php";
-        
-        $db = new DatabaseObject();
-
-        $honeypot = filter_input(INPUT_POST, 'phone');
-    
-        if ($honeypot) {
-            exit ("Security measure failed.");
-        }
-
-        $username = filter_input(INPUT_POST, 'username');
-        $display = filter_input(INPUT_POST, 'display-name');
-        $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-        $password = filter_input(INPUT_POST, 'password');
-        
-        /* Validate the inputs */
-        if (24 < strlen($username) || strlen($username) < 3 || !$username) {
-            length_err("Username");
-        }
-        
-        if (48 < strlen($display) || strlen($display) < 1 || !$display) {
-            length_err("Display");
-        }
-        
-        if (255 < strlen($email)) {
-            length_err("Email");
-        }
-        
-        if (72 < strlen($password) || strlen($password) < 8 || !$password) {
-            length_err("Password");
-        }
-    
-        if (!$email) {
-            php_form_alert("Invalid email, please try again.");
-        }
-        
-        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-        
-        /* This will be replaced with API code */
-        $query = "INSERT INTO user ("
-                . "username,"
-                . "display_name,"
-                . "email,"
-                . "password"
-                . ") VALUES (?, ?, ?, ?)";
-        
-        $params = [$username, $display, $email, $hashed_password];
-        
-        try {
-            $db->set_query($query, $params);
-        }
-        catch (mysqli_sql_exception) {
-            if ($db->errno === MYSQLI_DUPLICATE_ERRNO) {
-                php_form_alert("Username or email already exists.");
-            }
-            php_form_alert("Unspecified MySQL error.");
-        }
-        
-        // put user data in session array
-        $_SESSION['username'] = $username;
-        $_SESSION['display'] = $display;
-        $_SESSION['email'] = $email;
-        $_SESSION['usertype'] = 1;
-        $_SESSION['disabled'] = false;
-        $_SESSION['private'] = false;
-        
-        #header("Location: index.php");
-            
-    }
    
 ?>

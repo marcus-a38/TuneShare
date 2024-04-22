@@ -9,7 +9,7 @@
 body {
     margin: 0;
     padding: 0;
-    min-height: 100vh;
+    height: max-content;
     background-image: linear-gradient(#250057, #3f0f80);
     -webkit-font-smoothing: antialiased;
     background-repeat: no-repeat;
@@ -17,12 +17,16 @@ body {
 }
 
 main { /* everything except footer */
-    min-height: 100%;
+    min-height: 100vh;
 }
 
-.hover-darken {
+.hover-darken, .hover-brighten {
     filter: brightness(100%);
     transition: all 0.5s ease;
+}
+
+.hover-brighen:hover {
+    filter: brightness(1%);
 }
 
 .hover-darken:hover {
@@ -31,7 +35,6 @@ main { /* everything except footer */
 
 .container-fluid {
     width: 100%;
-    height: auto;
     margin: auto 0;
 }
 
@@ -51,7 +54,6 @@ footer {
     text-align: center;
     padding: 1%;
     color: white;
-    left: 0;
     background: #250057;
 }
 
@@ -404,6 +406,12 @@ nav {
     margin: 0 0.25rem;
     border-radius: 0.25rem;
     user-select: none;
+    filter: brightness(100%);
+    transition: all 0.5s ease;
+}
+
+.post-genres p:hover {
+    filter: brightness(85%);
 }
 
 .post-details a, .post-details p {
@@ -455,8 +463,14 @@ nav {
 
 .post-action {
     cursor: pointer;
-    height: 2rem;
-    width: 2rem;
+    margin: 0 0.25rem;
+    height: 1.65rem;
+    transform: scale(1);
+    transition: transform 0.25s ease;
+}
+
+.post-action:hover {
+    transform: scale(1.075);
 }
 
 #logout, #logout input {
@@ -508,7 +522,7 @@ nav {
 
 #logo {
     color: white;
-    font-size: 3rem;
+    font-size: 4rem;
     margin: 0;
     padding: 0;
     font-family: inherit;

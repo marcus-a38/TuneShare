@@ -6,7 +6,7 @@
                 <a href="profileSelf.php">account</a>    
             </div>
             <hr>
-            <?php if ($_SESSION['usertype'] == 2): // moderator ?> 
+            <?php if ($_SESSION['isMod']): // moderator ?> 
                 <div class="popup-option">
                     <a href="#">moderation</a>
                 </div>

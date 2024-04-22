@@ -1,6 +1,4 @@
-<?php 
-    require_once "header.php";
-?>
+<?php require_once "header.php"; ?>
 
 <div class="container-fluid" id="login-main">
     <div class="container" id="login-inner">
@@ -8,18 +6,24 @@
         <hr>
         <p id="form-alert"></p>
         <form action="" method="POST">
+            <input name="action"
+                   value="login" 
+                   class="secret" 
+                   readonly />
             <input type="text" 
                    class="input-text" 
                    name="account" 
                    placeholder="username or email"
-                   maxlength="255" />
+                   maxlength="255" 
+                   required />
             <div class="container" id="pword-group">
                 <input type="password" 
                        class="input-text" 
                        id="password" 
                        name="password" 
                        placeholder="password"
-                       maxlength="72" />
+                       maxlength="72" 
+                       required />
                 <img id="pword-toggle" 
                      src="../img/showpass.png"
                      onclick="togglePassVisible()" />
@@ -51,57 +55,7 @@
 <script src='revealPassword.js'></script>
 <script src='formAlerts.js'></script>
 
-<?php require_once "footer.php" ?>
-
-<?php
-
-    if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) == 'POST') {
-
-        $connection = new mysqli(
-            "localhost",
-            "root",
-            "",
-            "tuneshare"
-        );
-
-        $user = filter_input(INPUT_POST, 'account');
-        $password = filter_input(INPUT_POST, 'password');
-    
-        // determine whether the input is a username or email
-        $col = filter_var($user, FILTER_VALIDATE_EMAIL) ? "email" : "username";
-    
-        /* This will be replaced with API code */
-        $stmt = "SELECT"
-                . " username,"
-                . " display_name,"
-                . " email,"
-                . " password,"
-                . " user_type,"
-                . " is_disabled,"
-                . " is_private"
-                . " FROM user WHERE " . $col . " = " . "?";
-        
-        if (!$res = $connection->execute_query($stmt, array($user))) {
-            php_form_alert("Account for '" . $user . "' does not exist.");
-        } 
-    
-        $rows = $res->fetch_array(MYSQLI_ASSOC);
-    
-        if (!password_verify($password, $rows['password'])) {
-            php_form_alert("Invalid password for account '" . $user . "'.");
-        }
-    
-        // save user data to session array
-    
-        $_SESSION['username'] = $rows['username'];
-        $_SESSION['display'] = $rows['display_name'];
-        $_SESSION['email'] = $rows['email'];
-        $_SESSION['usertype'] = $rows['user_type'];
-        $_SESSION['disabled'] = $rows['is_disabled'];
-        $_SESSION['private'] = $rows['is_private'];
-        
-        header("Location: index.php");
-        
-    }
-
+<?php 
+    require_once "footer.php";
+    require_once "api/api.php";
 ?>

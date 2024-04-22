@@ -1,5 +1,4 @@
 <?php 
-// credit to https://www.php.net/manual/en/function.session-unset.php#107089
     session_start();
     session_unset();
     session_destroy();
