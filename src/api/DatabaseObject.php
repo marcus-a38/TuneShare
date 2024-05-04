@@ -1,43 +1,59 @@
 <?php
 
-const ONE_SECOND_IN_MICRO = 1_000_000; // μs
+require_once "Limiter.php";
 
-/*--/
-/* 
-/*  
-/*
-/*  @author Marcus Antonelli * contact@marcusantonelli.com
-/* pre
+/**
+ * 
+ * @author Marcus Antonelli
+ * 
+ * 
 */
 class DatabaseObject extends \mysqli {
   
-    
+    /**
+    *  @var type
+    **/
     public $post_fetch_ct;
     
+    
     /**
-    *  Default database connection settings
-    */
+    *  @var type
+    **/
     private static $default_settings = [
+        
+        // Database
         "hostname" => "localhost",
         "username" => "root", 
-        "password" => null, 
-        "database" => "tuneshare"
+        "password" => null,
+        "database" => "tuneshare",  
+        
+        // Limiter | [count, rate, cooldown]
+        "reqlimit" => [10, 1.0, 5.0],
+        
     ];
     
-    /*--/
-    /* 
-    /*  Constructor - Uses provided settings to create a connection to a MySQL
-    /*  database. Setups up data format and throttler.
-    /* 
-    /*  @param array $settings - Connection settings for DatabaseObject
-    /*
-    */
+    
+    /**
+    *  Rate limiter
+    * 
+    *  @var type
+    **/
+    private $limiter;
+    
+    /**
+    *  Binds optional parameters and executes an SQL statement.
+    *  @since PHP 8 >= 8.1
+    *
+    *  @param string $query  SQL query string, optionally parameterized.
+    *  @param ?array $params  Optional list of parameters for prepared statements.
+    *  @return mysqli_result|bool  True/false for set queries, result/false for get queries.
+    **/
     public function __construct(?array $settings = []) {
         
-        // Apply settings
+        // Instantiate with database settings
         $intersect = array_intersect_key($settings, self::$default_settings);
         $merged_settings = array_merge(self::$default_settings, $intersect);
-        parent::__construct(...$merged_settings);
+        parent::__construct(...array_slice($merged_settings, 3));
         
         if ($this->connect_errno) {
             echo "<h1>Debug- Database error: " . $this->connect_error . "</h1>";
@@ -47,66 +63,74 @@ class DatabaseObject extends \mysqli {
         $this->set_charset("utf8mb4");
         
         $this->post_fetch_ct = 0;
+        $this->limiter = new Limiter();
         
     }
     
-    public function query_with(string $query, ?array $params) {
+    
+    /**
+    *  Binds optional parameters and executes an SQL statement.
+    *  @since PHP 8 >= 8.1
+    *
+    *  @param string $query  SQL query string, optionally parameterized.
+    *  @param ?array $params  Optional list of parameters for prepared statements.
+    *  @return mysqli_result|bool  True/false for set queries, result/false for get queries.
+    **/
+    
+    // Rename "query_generic()"
+    public function query_with(string $query, ?array $params = []) {
         
+        // Abort query if the limiter rejects the request.
+        if (!$this->limiter->make_new_req()) {
+            return false;
+        }
+        
+        // Encapsulate the given query in an individual transaction.
         $this->begin_transaction();
         $response = $this->execute_query($query, $params);
         $this->commit();
-        
-        usleep(ONE_SECOND_IN_MICRO/2);
+    
         return $response;
         
     }
     
-    /*--/
-    /* 
-    /*  Executes READ queries on MySQL database, and either returns
-    /*  desired rows, or indicates failure (false value).
-    /* 
-    /*  @param Request $request - MySQL request/query to execute
-    /* 
-    /*  @returns [array | bool] _ - If there are successful results, return 
-    /*  array containing individual associative arrays for each SELECTed row.
-    /*  on failure, return false
-    /* 
-    /*  Footnote: This method needs to be adjusted in the future. The
-    /*  Request attributes are unused, but will be necessary in the future,
-    /*  when throttling methods are implemeneted.
-    /*
-    */
+    
+    /**
+    * Binds optional parameters and executes an SQL statement.
+    * @since PHP 8 >= 8.1
+    *
+    * @param string $query  SQL query string, optionally parameterized.
+    * @param ?array $params  Optional list of parameters for prepared statements.
+    * @return mysqli_result|bool  True/false for set queries, result/false for get queries.
+    **/
     public function get_query(string $query, ?array $params = []) {      
         
-        // Shared lock
+        // Acquire a shared lock.
         $sql = $query
                . " FOR SHARE;";
-        $response = $this->query_with($query, $params);
+        $response = $this->query_with($sql, $params);
+        
+        // Return an associative array of the results, or false if no results.
         return $response ? $response->fetch_all(MYSQLI_ASSOC) : false; 
         
     }
    
+    
     /**
-    **
-    ** 
-    **  public function set_query:
-    ** 
-    **  Carries out CREATE, UPDATE, or DELETE query on database,
-    **  indicates success(true)/failure(false) in doing so.
-    ** 
-    **  @param string $query
-    **  @param ?array $params
-    ** 
-    **  @returns bool $response - True/false to indicate query success/failure
-    **
-    ** 
-    */
+    * Binds optional parameters and executes an SQL statement.
+    * @since PHP 8 >= 8.1
+    *
+    * @param string $query  SQL query string, optionally parameterized.
+    * @param ?array $params  Optional list of parameters for prepared statements.
+    * @return mysqli_result|bool  True/false for set queries, result/false for get queries.
+    **/
     public function set_query(string $query, ?array $params = []) {
         
-        // Exclusive lock
+        // Acquire an exclusive lock.
         $sql = $query
                . " FOR UPDATE;";
+        
+        // Return true on successful queries, false on unsucessful.
         return $this->query_with($sql, $params);
         
     }

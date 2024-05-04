@@ -7,7 +7,7 @@ function receive_json() {
     global $_AJAX;
     $in = file_get_contents("php://input");
     foreach (json_decode($in, true) as $key => $value) {
-        $_AJAX[$key] = $value;
+        $_AJAX[$key] = filter_var($value, FILTER_UNSAFE_RAW);
     }
 }
 
@@ -212,6 +212,8 @@ function login(DatabaseObject &$db) {
         echo "Incorrect password for '".$account."'.";
         return false;
     }
+    
+    // replace with function e.g. "set_session_vars"
     $_SESSION['userId'] = $existing['id'];
     $_SESSION['username'] = $existing['username'];
     $_SESSION['display'] = $existing['display_name'];
@@ -248,11 +250,18 @@ function load_feed(DatabaseObject &$db) {
                 artist.name AS artist_name,
                 GROUP_CONCAT(genre.name) AS genres,
                 post.content,
-                SUM(CASE
-                    WHEN vote.is_upvote = 1 THEN 1
-                    WHEN vote.is_upvote IS NULL THEN 0
-                    ELSE -1 END
-                ) AS karma
+                IFNULL((SELECT
+                    SUM(
+                        CASE
+                            WHEN is_upvote = 1 THEN 1
+                            WHEN is_upvote = 0 THEN -1
+                            ELSE 0 
+                        END
+                    ) FROM vote WHERE vote.post_id = post.id), 0) AS karma,
+                IFNULL((SELECT is_upvote
+                    FROM vote 
+                    WHERE vote.post_id = post.id 
+                    AND vote.user_id = ?), -1) AS curr_vote
             FROM post
     
             INNER JOIN user
@@ -267,18 +276,17 @@ function load_feed(DatabaseObject &$db) {
                 ON album_genre.album_id = album.id
             INNER JOIN genre
                 ON genre.id = album_genre.genre_id
-            LEFT JOIN vote
-                ON vote.post_id = post.id   
         
             WHERE 
-                post.parent_id IS NULL
+                post.parent_id IS NULL -- post is NOT a comment
             GROUP BY
-                post.id
+                post_id, user.id, song.id, album.id, artist.id
             ORDER BY 
                 post.time_posted DESC
             LIMIT 50 OFFSET ?";
     
-    $response = $db->get_query($sql, [$_SESSION['feedLoadRefrCt']++]);
+    $params = [$_SESSION['userId'], 50*($_SESSION['feedLoadRefrCt']++)];
+    $response = $db->get_query($sql, $params);
     echo json_encode($response); // to AJAX
     
 } // function load_feed()
@@ -304,6 +312,8 @@ function load_feed(DatabaseObject &$db) {
  */
 function get_one_post(DatabaseObject &$db) {
     
+    session_start();
+    
     global $_AJAX;
     
     $slug = filter_var($_AJAX['slug'], FILTER_UNSAFE_RAW);
@@ -318,11 +328,17 @@ function get_one_post(DatabaseObject &$db) {
                 artist.name AS artist_name,
                 GROUP_CONCAT(genre.name) AS genres,
                 post.content,
-                SUM(CASE
-                    WHEN vote.is_upvote = 1 THEN 1
-                    WHEN vote.is_upvote IS NULL THEN 0
-                    ELSE -1 END
-                ) AS karma
+                IFNULL((SELECT
+                    SUM(CASE
+                        WHEN is_upvote = 1 THEN 1
+                        WHEN is_upvote = 0 THEN -1
+                        ELSE 0 
+                    END) 
+                FROM vote WHERE vote.post_id = post.id), 0) AS karma,
+                IFNULL((SELECT is_upvote
+                        FROM vote 
+                        WHERE vote.post_id = post.id 
+                        AND vote.user_id = ?), -1) AS curr_vote
             FROM post
     
             INNER JOIN user
@@ -337,12 +353,11 @@ function get_one_post(DatabaseObject &$db) {
                 ON album_genre.album_id = album.id
             INNER JOIN genre
                 ON genre.id = album_genre.genre_id
-            LEFT JOIN vote
-                ON vote.post_id = post.id
                 
             WHERE slug_hash = ?";
     
-    $response = $db->get_query($sql, [$slug])[0];
+    $params = [$_SESSION['userId'], $slug];
+    $response = $db->get_query($sql, $params)[0];
    //if (!$response) { header("Location: index.php"); }
     
     echo json_encode($response);
@@ -389,15 +404,15 @@ function vote_post(DatabaseObject &$db) {
     
     global $_AJAX;
     
-    $vote_type = filter_var($_AJAX['vote'], FILTER_SANITIZE_NUMBER_INT);
-    $post_slug = filter_var($_AJAX['slug'], FILTER_UNSAFE_RAW);
+    $vote_type = $_AJAX['vote'];
+    $post_slug = $_AJAX['slug'];
     
     // Select the post being voted on using its slug
     $post_params = [$post_slug];
     $post_sql = "SELECT id FROM post
-                   WHERE slug_hash = ?";
-    $pid = $db->get_query($post_sql, $post_params)[0]['id'];
+                 WHERE slug_hash = ?";
     
+    $pid = $db->get_query($post_sql, $post_params)[0]['id'];
     $uid = $_SESSION['userId'];
     
     // Check if the vote already exists
@@ -406,22 +421,20 @@ function vote_post(DatabaseObject &$db) {
     $existing_params = [$uid, $pid];
     $vid = $db->get_query($existing_sql, $existing_params);
     
-    if ($vote_type === "0") { // Unset an existing vote when user revokes it
+    if ($vote_type === "-1") { // Unset an existing vote when user revokes it
         $delete_params = [$vid[0]['id']];
         $delete_sql = "DELETE FROM vote
                        WHERE id = ?";
         $db->query_with($delete_sql, $delete_params);
     } 
     
-    else {
-        $vote_type = (intval($vote_type)+1) ? 0 : 1;
-        
-        if ($vid) { // Vote exists, so update it.
+    else {   
+        if (isset($vid[0]['id'])) { // Vote exists, so update it.
             $vid = $vid[0]['id'];
             $update_params = [$vote_type, $vid];
             $update_sql = "UPDATE vote
                            SET is_upvote = ?
-                           WHERE post_id = ?";
+                           WHERE id = ?";
             $db->query_with($update_sql, $update_params);
         }
         else { // Vote does not exist, so insert it.
@@ -483,7 +496,7 @@ $actions = [
     "vote" => "vote_post",
     "post" => "get_one_post",
     "user" => "get_user_details",
-    "userself" => "get_username"
+    "username" => "get_username"
 ];
 
 if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_UNSAFE_RAW) == 'POST'){
