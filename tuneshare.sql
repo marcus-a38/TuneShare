@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 08, 2024 at 04:08 AM
+-- Generation Time: May 14, 2024 at 09:19 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 8.2.0
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `tuneshare`
 --
+CREATE DATABASE IF NOT EXISTS `tuneshare` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `tuneshare`;
 
 -- --------------------------------------------------------
 
@@ -134,7 +136,7 @@ CREATE TABLE `user` (
   `email` varchar(255) NOT NULL,
   `phone` int(10) UNSIGNED DEFAULT NULL,
   `password` char(60) NOT NULL,
-  `user_type` tinyint(1) UNSIGNED NOT NULL DEFAULT 1,
+  `is_mod` tinyint(1) UNSIGNED NOT NULL DEFAULT 1,
   `creation_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `is_disabled` tinyint(1) NOT NULL DEFAULT 0,
   `is_private` tinyint(1) NOT NULL DEFAULT 0
@@ -195,7 +197,6 @@ ALTER TABLE `genre`
 --
 ALTER TABLE `post`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `slug_hash` (`slug_hash`),
   ADD KEY `fk_sid` (`song_id`),
   ADD KEY `fk_usid` (`user_id`),
   ADD KEY `fk_parid` (`parent_id`);
