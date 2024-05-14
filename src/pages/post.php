@@ -1,10 +1,10 @@
 <?php 
 
     $user_flag = true;
-    require_once "header.php"; 
+    require_once "../components/header.php"; 
     
     if (!isset($_SESSION['username'])) {
-        header("Location: register.php");
+        header("Location: ../features/register.php");
     } 
     
 ?>
@@ -34,21 +34,21 @@
                 <p class="post-body"></p> <!-- change to post-text-inner -->
             </div>
             <div class="post-btm">
-                <img src="../img/like.png" 
+                <img src="../../img/like.png" 
                      alt="Like" 
                      class="post-action post-like hover-darken" 
                 />
                 <span class="post-karma"></span>
-                <img src="../img/dlike.png" 
+                <img src="../../img/dlike.png" 
                      alt="Dislike" 
                      class="post-action post-dislike hover-darken" 
                 />
                 <span class="divider"></span>
-                <img src="../img/comment.png" 
+                <img src="../../img/comment.png" 
                      alt="Reply" 
-                     class="post-action post-comment hover-darken" 
+                     class="post-action post-reply hover-darken" 
                 />
-                <img src="../img/share.png" 
+                <img src="../../img/share.png" 
                      alt="Share" 
                      class="post-action post-share hover-darken" 
                      onclick="" 
@@ -59,14 +59,14 @@
 </template>
 </div>
 
-<script src="api.js"></script>
+<script src="../api/js/api.js"></script>
 
 <?php 
 
-require_once "api/api.php";
+require_once "../api/api.php";
 $slug = filter_input(INPUT_GET, 'p', FILTER_UNSAFE_RAW);
 if (!$slug) { header("Location: index.php"); exit; }
 echo "<script>getPost('".$slug."')</script>";
-require_once "footer.php";
+require_once "../components/footer.php";
 
 ?>

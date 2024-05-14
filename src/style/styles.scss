@@ -1,0 +1,167 @@
+@mixin media($height, $width) {
+    
+    @media only screen and (min-height: 1px) {
+        @content;
+    }
+    
+}
+
+@mixin no-margin-padding() {
+    margin: 0;
+    padding: 0;
+}
+
+@mixin full-height($width) {
+    min-height: 100%;
+    max-height: 100%;
+    width: $width;
+}
+
+@mixin full-width($height) {
+    min-width: 100%;
+    max-width: 100%;
+    height: $height;
+}
+
+@mixin row() {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+@mixin column() {
+    display: flex;
+    flex-flow: column wrap;
+}
+
+@mixin color-mode($isDark) {
+    
+    @if $isDark {
+        $themeText: (primary, #000000), (secondary, #000000), 
+                    (small, #000000);
+        $themeHeadings: (primary, #000000), (secondary, #000000),
+                        (emphasis, #000000);
+        $themeButtons: (primary, #000000), (secondary, #000000),
+                        (focus, #000000);
+        $themeLinks: (link, #000000), (a-button, #000000), (nav, #000000);
+        $background: #000033;  
+    }
+    @else {
+        $themeText: (primary, #000000), (secondary, #000000), 
+                    (small, #000000);
+        $themeHeadings: (primary, #000000), (secondary, #000000),
+                        (emphasis, #000000);
+        $themeButtons: (primary, #000000), (secondary, #000000),
+                        (focus, #000000);
+        $themeLinks: (link, #000000), (a-button, #000000), (nav, #000000);
+        $background: #000033;  
+    }
+    
+    @content;
+    
+}
+
+:root {
+    $dark: false;
+    @include color-mode($dark);
+    @include no-margin-padding();
+    @include full-height();
+    overflow-x: hidden;
+}
+
+main {
+    @include no-margin-padding();
+    @include full-height();
+    background-color: $background;
+}
+
+// Containers
+.container {
+    display: block;
+}
+
+.inner-container {
+    display: inline-block;
+}
+
+.fluid {
+    @include full-width();
+    margin: auto 0;
+}
+
+.image {
+    max-width: 100%;
+    height: auto;
+}
+
+// Visibility utility 
+.visible {
+    visibility: visibile;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+
+body {
+    
+    @include color-mode;
+    
+    color: $paragraphPrimary;
+    
+    @each $type, $val in $themeText {
+        .#{$type} {
+            color: $val;
+        }
+    }
+}
+
+.container-fluid {
+    @include fluid;
+    margin: auto 0;
+}
+
+footer {
+    @include fluid;
+    height: 5%;
+    padding: 1%;
+    color: $navPrimary;
+}
+
+.form-input {
+    
+    :focus {
+        outline: none;
+    }
+    
+    
+    
+}
+
+
+.pill-btn {
+    
+    background-color: $buttonPrimary;
+    
+    :focus, :hover {
+        outline: none;
+        background-color: $buttonPrimaryHover;
+    }
+    
+}
+
+#splash {
+    
+    h1 {
+        
+    }
+    
+    h3 {
+        
+    }
+    
+}
+
+.secret {
+    color: #000000;
+}

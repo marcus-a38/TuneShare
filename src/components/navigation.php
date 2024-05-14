@@ -1,7 +1,7 @@
 <nav>
-    <div id="p-popup" onclick="openPopup()">
+    <div id="p-popup" onclick="popupTogg(popups.usrmenu)">
         <a href="#" class="hover-darken">@<?php echo $_SESSION['username'] ?></a>
-        <span id="popup">
+        <span id="user-menu">
             <div class="popup-option">
                 <a href="profileSelf.php">account</a>    
             </div>
@@ -17,7 +17,7 @@
             </div>
             <hr>
             <div class="popup-option">
-                <form id="logout" action="logout.php">
+                <form id="logout" action="../features/logout.php">
                     <input type="submit" value="log out" />
                 </form>
             </div>

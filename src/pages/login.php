@@ -1,4 +1,4 @@
-<?php require_once "header.php"; ?>
+<?php require_once "../components/header.php"; ?>
 
 <div class="container-fluid" id="login-main">
     <div class="container" id="login-inner">
@@ -25,7 +25,7 @@
                        maxlength="72" 
                        required />
                 <img id="pword-toggle" 
-                     src="../img/showpass.png"
+                     src="../../img/showpass.png"
                      onclick="togglePassVisible()" />
             </div>
             <div class="secret"> <!-- Using `phone` as a trick name -->
@@ -43,7 +43,7 @@
             </div>
             <button class="pill-btn" type="submit">Submit</button>
             <hr>
-            <p>Don't have an account? <a href="./register.php">Sign up</a></p>
+            <p>Don't have an account? <a href="register.php">Sign up</a></p>
             <small>
                 Never give out your password. Under no circumstances<br>
                 will a developer ask you for your password.
@@ -52,10 +52,10 @@
     </div>
 </div>
 
-<script src='revealPassword.js'></script>
-<script src='formAlerts.js'></script>
+<script src='../js/revealPassword.js'></script>
+<script src='../js/formAlerts.js'></script>
 
 <?php 
-    require_once "footer.php";
-    require_once "api/api.php";
+    require_once "../components/footer.php";
+    require_once "../api/api.php";
 ?>

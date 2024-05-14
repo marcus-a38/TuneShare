@@ -1,7 +1,7 @@
 <?php
 
 $user_flag = true;
-require_once "header.php";
+require_once "../components/header.php";
 
 ?>
 
@@ -18,7 +18,7 @@ require_once "header.php";
         </small>
         <p class="user-bio"></p> <!-- Bio -->
         <div class="user-social"></div>
-        <!-- <?php if ($profile_self): ?>
+        <!-- <?php if (isset($profile_self)): ?>
         <button class="user-edit">Edit Info</button>
         <?php endif; ?> -->
     </div>
@@ -58,15 +58,15 @@ require_once "header.php";
     
 </div>
 
-<script src="api.js"></script>
+<script src="../api/js/api.js"></script>
 
 <?php
 
-require_once "api/api.php";
+require_once "../api/api.php";
 $user = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
 if (!$user) { header("Location: index.php"); exit; }
 echo "<script>getProfile('".$user."')</script>";
-require_once "footer.php";
+require_once "../components/footer.php";
 
 ?>
 

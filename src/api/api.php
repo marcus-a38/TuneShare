@@ -19,6 +19,7 @@ function receive_json() {
  */
 function php_form_alert(string $msg) {
     echo '<script type="text/javascript">formAlert("'.$msg.'");</script>';
+    exit;
 }
 
 function length_err(string $type) {
@@ -86,23 +87,37 @@ function register(DatabaseObject &$db) {
 
     // Honeypot triggered
     if (filter_input(INPUT_POST, 'phone')) {
-        return php_form_alert("Suspicious registration attempt aborted.");
+        php_form_alert("Suspicious registration attempt aborted.");
     }
     
     // Verify username length
     $username = filter_input(INPUT_POST, 'username', FILTER_UNSAFE_RAW);
-    if (24 < strlen($username) || strlen($username) < 3 || !$username) {
-        return length_err('Username');
+    
+    if (is_null($username)) {
+        php_form_alert("Username field is required.");
+    }
+    
+    if (!$username) {
+        php_form_alert("Username is invalid. Please try again.");
+    }
+    
+    if (24 < strlen($username) || strlen($username) < 3) {
+        length_err('Username');
     }
     
     // Next validate the email ...
     $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+    
+    if (is_null($email)) {
+        php_form_alert("Email field is required.");
+    }
+    
     if (!$email) {
-        return php_form_alert("Email is invalid. Please try again.");
+        php_form_alert("Email is invalid. Please try again.");
     }
     // ... and verify its length
-    if (255 < strlen($email)) {
-        return length_err('Email');
+    if (strlen($email) > 255 || strlen($email) < 3) {
+        length_err('Email');
     }
 
     // Now sanitize the email
@@ -117,25 +132,46 @@ function register(DatabaseObject &$db) {
 
     // Check if the username OR email is taken
     if ($existing) {
-        if ($existing['username'] == $username) {
-            $val = "Username " . $existing['username'];
+        
+        $e = $existing[0];
+        
+        if ($e['username'] == $username) {
+            $val = "Username " . "'".$e['username']."'";
         } 
         else {
-            $val = "Email " . $existing['email'];
+            $val = "Email " . "'".$e['email']."'";
         }
-        return php_form_alert($val . "is taken. Try a different value.");
+        php_form_alert($val . " is taken. Try a different value.");
     }
     
     // Verify display name length
     $display = filter_input(INPUT_POST, 'display_name', FILTER_UNSAFE_RAW);
-    if (48 < strlen($display) || strlen($display) < 1 || !$display) {
-        return length_err('Display name');
+    
+    if (is_null($display)) {
+        php_form_alert("Display name is required.");
+    }
+    
+    if (!$display) {
+        php_form_alert("Display name is invalid. Please try again.");
+    }
+    
+    if (48 < strlen($display) || strlen($display) < 3) {
+        length_err('Display name');
     }
     
     // Verify PW length
     $password = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
-    if (72 < strlen($password) || strlen($password) < 8 || !$password) {
-        return length_err('Password');
+    
+    if (is_null($username)) {
+        php_form_alert("Password is required.");
+    }
+    
+    if (!$password) {
+        php_form_alert("Password is invalid. Please try again.");
+    }
+    
+    if (72 < strlen($password) || strlen($password) < 8) {
+        length_err('Password');
     }
     
     // Hash the PW
@@ -158,8 +194,9 @@ function register(DatabaseObject &$db) {
         $_SESSION['email'] = $clean_email;
         $_SESSION['isMod'] = 1;
         $_SESSION['isPriv'] = false;
+        //header("Location: ../pages/index.php");
     } else {
-        return php_form_alert("Error signing up. Please try again later.");
+        php_form_alert("Error signing up. Please try again later.");
     }
             
 } // function register()
@@ -201,25 +238,29 @@ function login(DatabaseObject &$db) {
             FROM user 
             WHERE ".$type." = ?";
     
-    $existing = $db->get_query($sql, $login_params)[0];
+    $existing = $db->get_query($sql, $login_params);
+    $e = $existing[0];
     
     if (!$existing) {
-        echo "Account with " . $type . " '".$account."'" . " does not exist.";
+        php_form_alert(
+            "Account with " . $type . " '".$account."'" . " does not exist."
+        );
         return false;
     }
     
-    if (!password_verify($password, $existing['password'])) {
-        echo "Incorrect password for '".$account."'.";
+    if (!password_verify($password, $e['password'])) {
+        php_form_alert("Incorrect password for '".$account."'.");
         return false;
     }
     
     // replace with function e.g. "set_session_vars"
-    $_SESSION['userId'] = $existing['id'];
-    $_SESSION['username'] = $existing['username'];
-    $_SESSION['display'] = $existing['display_name'];
-    $_SESSION['email'] = $existing['email'];
-    $_SESSION['isMod'] = $existing['is_mod'];
-    $_SESSION['isPriv'] = $existing['is_private'];
+    $_SESSION['userId'] = $e['id'];
+    $_SESSION['username'] = $e['username'];
+    $_SESSION['display'] = $e['display_name'];
+    $_SESSION['email'] = $e['email'];
+    $_SESSION['isMod'] = $e['is_mod'];
+    $_SESSION['isPriv'] = $e['is_private'];
+    header("Location: ../pages/index.php");
     
     return true;
     
@@ -248,7 +289,7 @@ function load_feed(DatabaseObject &$db) {
                 DATEDIFF(now(), post.time_posted) AS elapsed,
                 song.title AS song_title,
                 artist.name AS artist_name,
-                GROUP_CONCAT(genre.name) AS genres,
+                GROUP_CONCAT(genre.name ORDER BY genre.name) AS genres,
                 post.content,
                 IFNULL((SELECT
                     SUM(
@@ -286,8 +327,8 @@ function load_feed(DatabaseObject &$db) {
             LIMIT 50 OFFSET ?";
     
     $params = [$_SESSION['userId'], 50*($_SESSION['feedLoadRefrCt']++)];
-    $response = $db->get_query($sql, $params);
-    echo json_encode($response); // to AJAX
+    $response = $db->get_query($sql, $params, true);
+    echo json_encode($response);
     
 } // function load_feed()
 
@@ -380,14 +421,6 @@ function delete_post(DatabaseObject &$db) {
     return $db->set_query($sql, $params);
 }
 
-/*
- *
- * 
- * 
- * 
- * 
- * 
-
 
 /*
  *
@@ -465,8 +498,84 @@ function get_user_details(DatabaseObject &$db) {
     $params = [$_AJAX['username']];
     
     $response = $db->get_query($sql, $params)[0];
+        
+    // handle no exist
+    
     echo json_encode($response);
     
+}
+
+function create_post(DatabaseObject &$db) {
+    
+    $sql = "INSERT INTO post (user_id, song_id, content, slug_hash)
+            VALUES (?, ?, ?, ?)";
+    
+    $user_id = $_SESSION['userId'];
+    
+    if (!check_post_ability($db)) { return; }
+    
+    $song_id = filter_input(INPUT_POST, 'song_id', FILTER_UNSAFE_RAW);
+    
+    if (!$song_id) {
+        php_form_alert("Invalid option for song.");
+    }
+    
+    if (is_null($song_id)) {
+        php_form_alert("Song selection is required.");
+    }
+    
+    $msg = filter_input(INPUT_POST, 'txt_body', FILTER_UNSAFE_RAW);
+    
+    if (!$msg) {
+        php_form_alert("Invalid message, please try again.");
+    }
+    
+    if (is_null($msg)) {
+        php_form_alert("Empty message, please try again.");
+    }
+    
+    if (strlen($msg) > 255 || strlen($msg) < 3) {
+        length_err("Post body");
+    }
+
+    do { // create a unique slug
+        $slug = substr(md5($user_id . $msg), 0, 8);
+        $slug_exists_sql = "SELECT id FROM post WHERE slug_hash = ?";
+        $res = $db->get_query($slug_exists_sql, [$slug]);
+    } while ($res);
+    
+    $params = [$user_id, $song_id, $msg, $slug];
+    
+    $response = $db->set_query($sql, $params);
+    
+}
+
+function create_reply(DatabaseObject &$db) {
+    
+}
+
+function check_post_ability(DatabaseObject &$db) {
+    
+    $sql = "
+            SELECT 
+                IFNULL(
+                    TIME_TO_SEC( TIMEDIFF( NOW(), MAX(time_posted) ) ),
+                    86400
+                ) AS time
+            FROM post 
+            WHERE user_id = ?";
+    
+    $check = $db->get_query($sql, [$_SESSION['userId']]);
+    if (!$check || $check[0]['time'] < 86400) {
+       return false; 
+    } 
+    return true;
+
+}
+
+function availibility(DatabaseObject &$db) {
+    session_start();
+    echo json_encode(['available' => check_post_ability($db)]);
 }
 
 /*
@@ -487,7 +596,9 @@ function get_username(DatabaseObject &$db) {
     
 }
 
-$conn = new DatabaseObject();
+if (!isset($conn)) {
+    $conn = new DatabaseObject();
+}
 
 $actions = [
     "signup" => "register",
@@ -496,7 +607,10 @@ $actions = [
     "vote" => "vote_post",
     "post" => "get_one_post",
     "user" => "get_user_details",
-    "username" => "get_username"
+    "username" => "get_username",
+    "newpost" => "create_post",
+    "reply" => "create_reply",
+    "avail" => "availibility"
 ];
 
 if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_UNSAFE_RAW) == 'POST'){

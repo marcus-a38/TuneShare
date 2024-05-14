@@ -3,13 +3,20 @@ const template = document.getElementById("post-template");
 
 async function newFetch(payload) {
     
+    const timeout = 5000; // timeout after 5s
+    const aController = new AbortController();
+    const tHandler = setTimeout(() => aController.abort, timeout);
+    
     const reqHeaders = new Headers();
     reqHeaders.append('Content-Type', 'application/json');
     const reqDetails = {
         method: "POST",
         headers: reqHeaders,
-        body: payload
+        body: payload,
+        signal: aController.signal
     };
+    
+    clearTimeout(tHandler);
     
     const response = await fetch("/TuneShare/src/api/api.php", reqDetails);
     var json = await response.json();
@@ -75,8 +82,8 @@ class PostElement extends ApiElement {
         this.postId = details.post_id;
         this.userId = details.user_id;
         this.slug = details.slug;
-        this.voteMode = 0;
         this.karma = parseInt(details.karma);
+        this.voteMode = details.curr_vote;
         this.#setSlug();
         this.#setName(details.display_name);
         this.#setTime(details.elapsed);
@@ -86,6 +93,7 @@ class PostElement extends ApiElement {
         this.#setBody(details.content);
         this.#setKarma(details.karma);
         this.#setListeners();
+        
     }
     
     #setSlug() {
@@ -94,7 +102,7 @@ class PostElement extends ApiElement {
     }
     
     #setName(name) {
-        this.innerElements[0].innerText = name; 
+        this.displayName = this.innerElements[0].innerText = name; 
     }
     
     #setTime(stamp) {
@@ -141,62 +149,99 @@ class PostElement extends ApiElement {
     #updateVote(val) {
         this.karma += val;
         this.#setKarma(this.karma);
-        
-        var request = JSON.stringify({
-            "action": "vote", 
-            "slug": this.slug, 
-            "vote": val
-        });
-        newFetch(request);
+       
+        (async () => {
+            var request = JSON.stringify({
+                "action": "vote", 
+                "slug": this.slug, 
+                "vote": this.voteMode
+            });
+                var response = await newFetch(request); // username
+        })(); 
     }
     
     /* Add event listeners for the post action toolbar */
     #setListeners() {
         let upvote = this.actions.querySelector(".post-like");
         let downvote = this.actions.querySelector(".post-dislike");
-        //let reply = this.actions.querySelector("");
+        let reply = this.actions.querySelector(".post-reply");
         let share = this.actions.querySelector(".post-share");
         
         // Visiting poster profile
         this.innerElements[0].addEventListener("click", () => {
-            
             (async () => {
                 var request = JSON.stringify({
-                    "action": "userself",
+                    "action": "username",
                     "user_id": this.userId
                 });
-                var response = await newFetch(request); // slug
-                window.location.href = getPath("profile.php?user=" + response);
-            })();
-            
+                var response = await newFetch(request); // username
+                window.location.href = getPath("profile.php?u=" + response['username']);
+            })();  
         });
         
+        // -1 unset, 1 upvote, 0 downvote
         upvote.addEventListener("click", () => {
             if (this.voteMode === 1) {
+                this.voteMode = -1;
                 this.#updateVote( -1 );
-                this.voteMode = 0;
             }
-            else if (this.voteMode === 0 || this.voteMode === -1) {
-                this.#updateVote( 1 - this.voteMode );
+            else if (this.voteMode === -1) {
                 this.voteMode = 1;
+                this.#updateVote( 1 );
             }
+            else if (this.voteMode === 0) {
+                this.voteMode = 1;
+                this.#updateVote( 2 );
+            }
+            
         });
         
         downvote.addEventListener("click", () => {
-            if (this.voteMode === -1) {
-                this.#updateVote( 1 );
-                this.voteMode = 0;
-            }
-            else if (this.voteMode === 0 || this.voteMode === 1) {
-                this.#updateVote( -1 - this.voteMode );
+            if (this.voteMode === 0) {
                 this.voteMode = -1;
+                this.#updateVote( 1 );
+                return;
             }
+            else if (this.voteMode === -1) {
+                this.voteMode = 0;
+                this.#updateVote( -1 );
+            }
+            else if (this.voteMode === 1) {
+                this.voteMode = 0;
+                this.#updateVote( -2 );
+            }
+            
         });
         
         share.addEventListener("click", () => {
             navigator.clipboard.writeText(getPath("post.php?p=" + this.slug));
             window.alert("Post URL copied to clipboard.");
         });
+        
+        reply.addEventListener("click", () => {
+            popupTogg(popups.newrepl);
+            let title = newReplyPopup.querySelector("#reply-user");
+            title.innerText = "Replying to " + this.displayName;
+        });
+        
+    }
+    
+    #fetchReplies() {
+        
+        var response;
+        
+        (async () => {
+            var request = JSON.stringify({
+                "action": "replies",
+                "post_id": this.postId
+            });
+            response = await newFetch(request); // username
+        })();
+        
+        if (response['replies']) {
+            
+        }
+        
     }
 }
 
@@ -263,11 +308,23 @@ function getProfile(username) {
 function getProfileSelf(userId) {
     (async () => {
         var request = JSON.stringify({
-            "action": "userself",
+            "action": "username",
             "user_id": userId
         });
         var response = await newFetch(request); // username
         window.location.href = getPath("profile.php?u=" + response['username']);
     })();
-    
+}
+
+function getAvailability() {
+    let btn = document.getElementById('new-post');
+    (async () => {
+        var request = JSON.stringify({
+            "action": "avail"
+        });
+        var response = await newFetch(request); // username
+        if (!response['available']) {
+            btn.classList.add('hidden');
+        }
+    })();
 }

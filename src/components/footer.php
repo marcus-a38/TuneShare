@@ -8,11 +8,19 @@
     </footer>
     <?php if (isset($_SESSION['userId'])): ?>
     <script>
-        function openPopup() {
-            var popup = document.getElementById("popup");
-            popup.classList.toggle("show");
+
+        function toggleColor() {
+            var toggler = document.getElementById("toggle-dark");
+            if (toggler.getAttribute('src') === "../../img/moon.png") {
+                toggler.src = "../../img/sun.png";
+            } else {
+                toggler.src = "../../img/moon.png";
+            }
         }
+        
     </script>
+    <script src='../js/formAlerts.js'></script>
+    <script src=../js/popups.js></script>
     <?php endif; ?>
 </body>
 </html>
